@@ -808,3 +808,150 @@ int main(int argc, char const *argv[])
     return 0;
 }
 ```
+### 进程的概念
+
+* 程序
+    > 程序（program）是存放在磁盘中的可执行文件
+
+* 进程
+    > 程序的执行实例被称为进程（process）
+    > 
+    > 进程具有独立的权限与职责。如果系统中某个进程崩溃，它不会影响到其余进程
+    > 
+    > 每个进程运行在其各自的虚拟地址空间中，进程之间可以通过由内核控制的机制相互通讯
+* 进程ID
+    > 每个linux进程中都一定有一个唯一的数字标识符，称为进程ID，进程ID总是一非负整数
+
+* shell 指令 ps
+    > ps  查看进程
+    > 
+    > ps -ef  查看进程详细信息
+    > 
+    > ps -aux  查看进程消耗资源
+
+* 进程运行状态
+    > D 不可中断 uninterruptible sleep (usually IO)
+    > 
+    > R 运行 runnable (on run queue)
+    > 
+    > S 休眠 sleeping
+    > 
+    > T 停止 traced or stopped
+    > 
+    > Z 僵死 a defunct (”zombie”) process
+
+### 进程终止
+
+* 正常终止
+    > 从main函数返回
+    > 
+    > 调用exit（标准c库函数）
+    > 
+    > 调用_exit或_Exit(系统调用)
+    > 
+    > 最后一个线程从其启动例程返回
+    > 
+    > 最后一个线程调用pthread_exit
+
+* 异常终止
+    > 调用abort
+    > 
+    > 接收到一个信号并终止
+    > 
+    > 最后一个线程对取消请求做处理相应
+
+* 进程返回
+    > 通常程序成功运行返回0，否则返回非0
+    > 
+    > 在shell中可以查看进程返回值（echo $?）
+
+* 进程终止方式的区别
+    |   | return |exit()|_exit()/_Exit()|
+    |:----:|:----:|:----:|:----:|
+    |是否刷新标准I/O缓存|是|是|否|
+    |是否自动调用终止函数|是|是|否|
+
+### 进程标识
+    ```C++
+    #include <unistd.h>
+    #include <sys/types.h>
+    pid_t getpid(void);
+    //获取当前进程ID
+    uid_t getuid(void);
+    //获取当前进程的实际用户ID
+    uid_t geteuid(void);
+    //获取当前进程的有效用户ID
+    gid_t getgid(void);
+    //获得当前进程的用户组ID
+    pid_t getppid(void);
+    //获得当前进程的父进程ID
+    pid_t getpgrp(void);
+    //获得当前进程所在的进程组ID
+    pid_t getpgid(void);
+    //获得进程ID为pid的进程所在的进程组ID
+    ```
+
+### 进程创建
+
+    ```C++
+    #include <sys/types.h>
+    #include <unistd.h>
+
+    pid_t fork(void);
+    //返回：子进程中为0，父进程中为子进程ID，出错为-1
+    pid_t vfork(void);
+    //返回：子进程中为0，父进程中为子进程ID，出错为-1
+    ```
+
+* 注意
+    > fork创建的新的进程成为子进程，该函数被调用一次，但返回两次。两次返回的区别是：在子进程中返回值是0，在父进程中返回值是新的子进程的ID。
+    > 
+    > 创建子进程，父子进程哪个先运行根据系统调用，子进程复制父进程的内存空间
+    > 
+    > vfork创建子进程，但子进程先运行且不复制父进程的内存空间
+
+### 进程链和进程扇
+
+* 关键代码
+    ```C++
+    for(i; i < counter; ++i)
+    {
+        //需要保证父进程在fork一次之后下次循环不可以继续fork
+        pid = fork();
+        if(pid == -1)
+        {
+            perror("fail to fork");
+            exit(1);
+        }
+        // else if(pid > 0)
+        // {//父进程代码
+        //     break; //父进程退出循环，子进程继续fork
+        // }
+        else if(pid == 0)
+        {
+            break;  //进程扇，子进程退出循环，父进程继续fork
+        }
+        
+    }
+    ```
+### 僵尸进程
+
+* 子进程已经退出，但其资源没有被完全释放，就会变成僵尸进程
+* wait()函数和waitpid()函数
+    > 在一个子进程终止前，wait函数使其调用者阻塞
+    > 
+    > waitpid有一个选项，可以使调用者不阻塞
+    > 
+    > waitpid等待一个指定的子进程，而wait等待所有的子进程，返回任意一个终止子进程的状态
+
+    ```c++
+    #include <sys/types.h>
+    #include <sys/wait.h>
+
+    pid_t wait(int *status);
+    //返回：成功返回子进程ID，出错返回-1
+    //功能：等待子进程退出并回收，防止孤儿进程产生
+    pid_t waitpid(pid_t pid, int *status, int options);
+    //返回：成功返回子进程ID，出错返回-1
+    //功能：wait函数的非阻塞版本
+    ```
