@@ -1,0 +1,1 @@
+s: hello fork, pid: 1232127pid: 1232127, g_v: 40, l_v: 40, s_v: 40s: hello fork, pid: 1232127pid: 1232128, g_v: 50, l_v: 50, s_v: 50
