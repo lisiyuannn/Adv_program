@@ -1,4 +1,4 @@
-//进程链
+//进程链和进程扇
 
 #include <sys/types.h>
 #include <unistd.h>

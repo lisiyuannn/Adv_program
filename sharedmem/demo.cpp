@@ -1,6 +1,13 @@
 //共享内存  只能使用内置的数据类型，因为其他数据类型例如STL会自动扩展内存
 //shell中执行 ipcs -m 可以查看当前共享内存
 //ipcrm -m 编号 可以手动删除共享内存
+/*
+* 创建共享内存 shmget 返回内存编号  失败返回-1
+* 连接共享内存到当前进程 shmat 返回内存首地址  失败返回(void *)-1
+* 使用共享内存
+* 共享内存分离  shmdt  参数为首地址
+* 删除共享内存  shmctl 参数为编号，失败返回-1
+*/
 #include <iostream>
 #include <sys/ipc.h>
 #include <sys/shm.h>

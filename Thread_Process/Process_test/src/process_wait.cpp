@@ -27,7 +27,7 @@ int main(int argc, char const *argv[])
     }
 
     //父进程阻塞，等待子进程结束并回收
-    sleep(1);
+    //sleep(1);
     wait(&status);
     
     out_status(status);  //输出状态信息
@@ -48,7 +48,7 @@ int main(int argc, char const *argv[])
     }
 
     //父进程阻塞，等待子进程结束并回收
-    sleep(1);
+    //sleep(1);
     wait(&status);
     
     out_status(status);  //输出状态信息

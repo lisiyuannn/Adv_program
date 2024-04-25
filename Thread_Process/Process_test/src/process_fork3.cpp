@@ -24,6 +24,7 @@ int main(int argc, char const *argv[])
     else if(pid > 0)
     {//父进程执行代码
         g_v = 40; l_v = 40; s_v = 40;
+        sleep(5);
         cout << "I am parent process, pid is " << getpid() << endl;
         cout << "g_v: " << &g_v << endl;
         cout << "l_v: " << &l_v << endl;
